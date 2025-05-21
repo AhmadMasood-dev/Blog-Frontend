@@ -1,0 +1,18 @@
+/* @import "tailwindcss";
+
+@theme {
+  --color-primary: #edae49;
+  --color-secondary: #e8dab2;
+  --color-accent: #092327;
+} */
+/* @import "tailwindcss";
+@theme {
+  --color-mint: oklch(0.72 0.11 178);
+} */
+/* @layer theme {
+  
+    --tw-color-primary: #edae49;
+    --color-secondary: #e8dab2;
+    --color-accent: #092327;
+  }
+} */
