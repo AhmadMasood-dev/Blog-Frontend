@@ -1,48 +1,46 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { MdModeComment } from "react-icons/md";
 import { BsFillCalendar2DateFill } from "react-icons/bs";
-import { getPostsApi } from "../../services/posts"; // Import the API utility
-import Spinner from "../../utils/Spinner"; // Import the spinner component
+import { getPostsApi } from "../../services/posts";
+import Spinner from "../atoms/Spinner";
 import { toast } from "react-hot-toast";
 import { Link } from "react-router-dom";
-import { formatDate } from "../../utils/FormatDate";
+import { formatDate } from "../../utils/helper/FormatDate";
 
 const Posts = () => {
   const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true); // Initialize as true to show spinner immediately
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch posts on component mount
   useEffect(() => {
-    const fetchPosts = async () => {
-      setLoading(true);
-      try {
-        const { data } = await getPostsApi();
-        console.log("Response from API:", data);
-        setPosts(data.posts);
-      } catch (err) {
-        setError(err.message);
-        toast.error(err.message || "Failed to fetch posts");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchPosts();
-  }, []); // No dependencies
+  }, []);
 
+  const fetchPosts = async () => {
+    setLoading(true);
+    try {
+      const { data } = await getPostsApi();
+
+      setPosts(data.posts);
+    } catch (err) {
+      setError(err.message);
+      toast.error(err.message || "Failed to fetch posts");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div>
       <div className="max-w-screen-xl p-5 mx-auto sm:p-10 md:p-16">
         <div className="flex justify-between mb-5 text-sm border-b">
           <div className="flex items-center pb-2 pr-2 uppercase border-b-2 text-primary border-primary">
-            <a href="#" className="inline-block font-semibold">
+            <Link to="/posts " className="inline-block font-semibold">
               Blog Posts
-            </a>
+            </Link>
           </div>
-          <a href="#" className="text-primary">
+          <Link to="/posts" className="text-primary">
             See All
-          </a>
+          </Link>
         </div>
 
         {loading ? (
@@ -64,8 +62,6 @@ const Posts = () => {
 };
 
 const PostCard = ({ post }) => {
-  // Function to format date as DD/MM or DD/MM/YY
-
   return (
     <div className="flex flex-col overflow-hidden rounded shadow-lg">
       <div className="relative">

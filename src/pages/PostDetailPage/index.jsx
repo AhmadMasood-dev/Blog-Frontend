@@ -1,5 +1,5 @@
 import React from "react";
-import PostsDetail from "../components/PostsDetail";
+import PostsDetail from "../../components/PostsDetail";
 const PostDetailPage = () => {
   return (
     <>

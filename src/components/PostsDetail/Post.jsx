@@ -4,13 +4,14 @@ import { MdModeComment } from "react-icons/md";
 import { BsFillCalendar2DateFill } from "react-icons/bs";
 import { FaUser } from "react-icons/fa";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
 import { getPostByIdApi, getCommentsForPostApi } from "../../services/posts";
-import { addCommentApi } from "../../services/comments"; // Create this file
+import { addCommentApi } from "../../services/comments";
 import { AuthContext } from "../../context/AuthContext";
-import Spinner from "../../utils/Spinner";
+import Spinner from "../atoms/Spinner";
 import { toast } from "react-hot-toast";
-import { formatDate } from "../../utils/FormatDate";
+import { formatDate } from "../../utils/helper/FormatDate";
+import { CreateCommentSchema } from "../../utils/validationSchema/PostSchema";
+import Button from "../atoms/Button";
 
 const Post = () => {
   const { id } = useParams();
@@ -20,23 +21,15 @@ const Post = () => {
   const [comments, setComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  // Get auth context
-  const { user, isAuthenticated } = useContext(AuthContext);
-  
-  // Validation schema for comment form
-  const commentSchema = Yup.object().shape({
-    comment: Yup.string()
-      .required("Comment is required")
-      .min(3, "Comment must be at least 3 characters"),
-  });
-  // Fetch post details
+
+  const { isAuthenticated } = useContext(AuthContext);
+
   useEffect(() => {
     const fetchPostDetail = async () => {
       setLoading(true);
       try {
         const { data } = await getPostByIdApi(id);
         setPost(data.post);
-        // If comments are included in the post data
         if (data.ok) {
           setComments(data.post.comment);
         }
@@ -49,7 +42,7 @@ const Post = () => {
     };
     fetchPostDetail();
   }, [id]);
-  // Fetch comments separately
+
   useEffect(() => {
     const fetchComments = async () => {
       setCommentsLoading(true);
@@ -60,17 +53,16 @@ const Post = () => {
         }
       } catch (err) {
         console.error("Error fetching comments:", err.message);
-        // Don't show error toast for comments, just log it
       } finally {
         setCommentsLoading(false);
       }
     };
-    // Only fetch comments separately if post is loaded
+
     if (post && post._id) {
       fetchComments();
     }
   }, [id, post]);
-  // Handle comment submission
+
   const handleCommentSubmit = async (values, { resetForm }) => {
     if (!isAuthenticated) {
       toast.error("Please log in to comment");
@@ -79,18 +71,18 @@ const Post = () => {
     setSubmitting(true);
     try {
       const commentIs = values.comment.trim();
-      // Call the API with the comment
+
       const response = await addCommentApi(id, {
         commentIs: values.comment.trim(),
       });
-      // Get the new comment from the response
+
       const newComment = response.data;
-      // Add the new comment to comments
+
       setComments((prevComments) => [...prevComments, newComment]);
-      // Reset the form
+
       resetForm();
       toast.success("Comment successfully added");
-      // Refresh comments to get the updated list with user info
+
       getCommentsForPostApi(id)
         .then((response) => {
           if (response.data && response.data.comments) {
@@ -111,9 +103,7 @@ const Post = () => {
   if (!post) return <p className="text-center text-red-500">Post not found.</p>;
   return (
     <div className="max-w-4xl px-4 py-8 mx-auto sm:px-6 lg:px-8">
-      {/* Post Header */}
       <h1 className="mb-4 text-3xl font-bold text-primary">{post.title}</h1>
-      {/* Post Metadata */}
       <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-secondary">
         <div className="flex items-center">
           <FaUser className="mr-1" />
@@ -130,7 +120,6 @@ const Post = () => {
           <span>{comments.length || 0} Comments</span>
         </div>
       </div>
-      {/* Featured Image */}
       {post.postImage && (
         <div className="mb-8">
           <img
@@ -140,11 +129,9 @@ const Post = () => {
           />
         </div>
       )}
-      {/* Post Content */}
       <div className="prose max-w-none">
         <p className="mb-4 text-lg text-secondary">{post.description}</p>
       </div>
-      {/* Author Section */}
       {post.author && (
         <div className="p-6 mt-8 border-t border-secondary">
           <h2 className="mb-4 text-xl font-semibold text-primary">Author</h2>
@@ -165,19 +152,16 @@ const Post = () => {
           </div>
         </div>
       )}
-      {/* Comments section */}
       <div className="mt-12">
         <h2 className="mb-6 text-2xl font-semibold text-primary">
           Comments ({comments.length})
         </h2>
-        {/* Comment form with Formik */}
-        {/* Comment form with Formik */}
         <Formik
           initialValues={{ comment: "" }}
-          validationSchema={commentSchema}
+          validationSchema={CreateCommentSchema}
           onSubmit={handleCommentSubmit}
         >
-          {({ isSubmitting, errors, touched }) => (
+          {({ values, isSubmitting, errors, touched }) => (
             <Form className="mb-8">
               <div className="mb-4">
                 <Field
@@ -185,6 +169,7 @@ const Post = () => {
                   id="comment"
                   name="comment"
                   rows="4"
+                  value={values.comment}
                   className={`w-full p-3 border rounded-lg border-secondary focus:outline-none focus:ring-2 focus:ring-primary ${
                     errors.comment && touched.comment ? "border-red-500" : ""
                   }`}
@@ -199,22 +184,22 @@ const Post = () => {
               </div>
 
               {isAuthenticated ? (
-                <button
+                <Button
                   type="submit"
                   className="px-6 py-2 text-white rounded-lg bg-primary hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   disabled={submitting}
                 >
                   {submitting ? "Submitting..." : "Add Comment"}
-                </button>
+                </Button>
               ) : (
                 <div>
-                  <button
+                  <Button
                     type="button"
                     disabled
                     className="px-6 py-2 text-white rounded-lg cursor-not-allowed bg-primary opacity-70"
                   >
                     Add Comment
-                  </button>
+                  </Button>
                   <p className="mt-2 text-sm text-red-500">
                     Please log in to leave a comment.
                   </p>
@@ -223,7 +208,6 @@ const Post = () => {
             </Form>
           )}
         </Formik>
-        {/* Comments list */}
         {commentsLoading ? (
           <div className="text-center">
             <Spinner />
@@ -237,7 +221,6 @@ const Post = () => {
                 className="p-4 rounded-lg bg-[#4e6063]"
               >
                 <div className="flex items-center mb-2">
-                  {/* Check if the user is populated or if we need to load user data */}
                   {typeof comment.user === "object" && comment.user?.avatar ? (
                     <img
                       src={comment.user.avatar}

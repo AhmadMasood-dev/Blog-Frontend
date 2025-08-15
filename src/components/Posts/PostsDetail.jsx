@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { getAllPosts } from "../../services/posts"; // Adjust path if needed
+import { getAllPosts } from "../../services/posts";
 import toast from "react-hot-toast";
-import Spinner from "../../utils/Spinner";
+import Spinner from "../atoms/Spinner";
 import { Link } from "react-router-dom";
-import { formatDate } from "../../utils/FormatDate";
+import { formatDate } from "../../utils/helper/FormatDate";
 import { IoIosArrowRoundForward } from "react-icons/io";
 function PostsDetail() {
   const [posts, setPosts] = useState([]);
@@ -16,9 +16,10 @@ function PostsDetail() {
       setError("");
       try {
         const response = await getAllPosts();
-        if (response.success) {
-          setPosts(response.data.posts || []);
+        if (response?.success) {
+          setPosts(response?.data?.posts || []);
           toast.success(response.message);
+          console.log("Posts loaded successfully:", response.data.posts);
         }
       } catch (err) {
         toast.error(err.message || "Failed to load posts.");
@@ -40,14 +41,14 @@ function PostsDetail() {
       )}
       {!loading && !error && (
         <ul className="flex flex-col items-center max-w-4xl py-8 mx-auto gap-y-10">
-          {posts.map((post, idx) => (
+          {posts?.map((post, idx) => (
             <li
               key={post._id || idx}
               className="flex flex-row items-start w-full overflow-hidden bg-white rounded-lg shadow-md"
             >
               <div className="flex-shrink-0 w-56 h-64">
                 <img
-                  src={post.postImage || bg1}
+                  src={post.postImage}
                   alt={post.title || "Post image"}
                   className="object-cover w-full h-full"
                   width="224"
@@ -73,7 +74,12 @@ function PostsDetail() {
                   Learn more <IoIosArrowRoundForward />
                 </Link>
                 <div className="mt-2 text-sm text-gray-500">
-                  {post.createdAt ? formatDate(post.createdAt) : ""}
+                  <span>{post.createdAt && formatDate(post.createdAt)}</span>
+                  <span>
+                    {post.comment && post.comment.length > 0
+                      ? ` | ${post.comment.length} comments`
+                      : " | No comments yet"}
+                  </span>
                 </div>
               </div>
             </li>

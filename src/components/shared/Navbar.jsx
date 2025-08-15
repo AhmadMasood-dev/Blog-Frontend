@@ -1,14 +1,13 @@
 import { blogLogo } from "../../assets/images";
-import Button from "../../utils/Button";
+import Button from "../atoms/Button";
 import { IoIosArrowRoundForward } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 
 function Navbar() {
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useContext(AuthContext);
-  console.log(user, "user in navbar");
   const handleLogout = () => {
     logout();
     navigate("/login");
@@ -29,6 +28,12 @@ function Navbar() {
           </Link>
           <Link to="/create-post" className="hover:text-primary text-secondary">
             Create-Post
+          </Link>
+          <Link
+            to="/get-user-posts"
+            className="hover:text-primary text-secondary"
+          >
+            My-Post
           </Link>
         </nav>
         <div className="flex items-center gap-4">

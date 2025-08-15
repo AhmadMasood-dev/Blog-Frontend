@@ -1,5 +1,6 @@
 import { Typography } from "@material-tailwind/react";
-import Button from "../../utils/Button";
+import Button from "../atoms/Button";
+import { Link } from "react-router-dom";
 export function HeroSection() {
   return (
     <section className="items-center w-full m-10 mx-auto ">
@@ -11,7 +12,7 @@ export function HeroSection() {
           Simple breakdowns of complex topics — curated for curious minds.
         </Typography>
         <Button variant="filled" className="flex-shrink-0 ">
-          Create Post
+          <Link to="/create-post">Create Post</Link>
         </Button>
       </div>
     </section>
